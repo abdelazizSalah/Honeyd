@@ -1,15 +1,16 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(honeyd)
+AC_INIT
+AC_CONFIG_SRCDIR([honeyd])
 AC_CONFIG_SRCDIR(honeyd.c)
 
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_TARGET
 AC_CANONICAL_HOST
 
 AM_INIT_AUTOMAKE(honeyd, 1.6d)
 AC_CONFIG_HEADERS(config.h)
 AM_MAINTAINER_MODE
 
-AM_PROG_LIBTOOL
+LT_INIT
 
 AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE], [Define if your system defines struct sockaddr_storage])
 AH_TEMPLATE([HAVE_ACCRIGHTS_IN_MSGHDR], [Define if your system uses access rights style file descriptor passing])
@@ -125,7 +126,7 @@ AC_ARG_WITH(libpcap,
 	PCAPINC="-I$withval -I$withval/bpf"
 	PCAPLIB="-L$withval -lpcap"
      else
-        AC_ERROR(pcap.h or libpcap.a not found in $withval)
+        AC_MSG_ERROR(pcap.h or libpcap.a not found in $withval)
      fi
      ;;
   esac ],
@@ -142,7 +143,7 @@ AC_ARG_WITH(libpcap,
      PCAPLIB="-lpcap"
   else
      AC_MSG_RESULT(no)
-     AC_ERROR(libpcap not found)
+     AC_MSG_ERROR(libpcap not found)
   fi
   AC_MSG_RESULT(yes)
 ]
@@ -167,7 +168,7 @@ AC_ARG_WITH(libdnet,
 [  --with-libdnet=DIR      use libdnet in DIR],
 [ case "$withval" in
   yes|no)
-     AC_ERROR([Please specify directory containing dnet-config when using --with-libdnet])
+     AC_MSG_ERROR(Please specify directory containing dnet-config when using --with-libdnet)
      ;;
   *)
      AC_MSG_CHECKING(for libdnet)
@@ -180,7 +181,7 @@ AC_ARG_WITH(libdnet,
 	DNETLIB="`$withval/bin/dnet-config --libs`"
      else
         AC_MSG_RESULT(no)
-        AC_ERROR(dnet-config not found in $withval/bin)
+        AC_MSG_ERROR(dnet-config not found in $withval/bin)
      fi
      ;;
   esac
@@ -188,7 +189,7 @@ AC_ARG_WITH(libdnet,
 [ dnl This is the default case so let's just use AC_PATH_PROG! --CPK.
   AC_PATH_PROG(dnetconfig, dnet-config, "no")
   if test "$dnetconfig" = "no"; then
-     AC_ERROR(dnet-config not found)
+     AC_MSG_ERROR(dnet-config not found)
   else
      DNETINC="`$dnetconfig --cflags`"
      DNETLIB="`$dnetconfig --libs`"
@@ -236,7 +237,7 @@ AC_ARG_WITH(libevent,
 	EVENTINC="-I$withval/include"
 	EVENTLIB="-L$withval/lib -levent"
      else
-        AC_ERROR(event.h or libevent.a not found in $withval)
+        AC_MSG_ERROR(event.h or libevent.a not found in $withval)
      fi
      ;;
   esac ],
@@ -250,7 +251,7 @@ AC_ARG_WITH(libevent,
      EVENTLIB="-levent"
   else
      AC_MSG_RESULT(no)
-     AC_ERROR(libevent not found)
+     AC_MSG_ERROR(libevent not found)
   fi
   AC_MSG_RESULT(yes) ]
 )
@@ -321,7 +322,7 @@ AC_ARG_WITH(libedit,
         EDITINC="-I$withval"
         EDITLIB="-L$withval -ledit"
      else
-        AC_ERROR(histedit.h or libedit.a not found in $withval)
+        AC_MSG_ERROR(histedit.h or libedit.a not found in $withval)
      fi
      ;;
   esac ],
@@ -361,7 +362,7 @@ AC_ARG_WITH(libreadline,
         EDITINC="-I$withval"
         EDITLIB="-L$withval -lreadline"
      else
-        AC_ERROR(readline/readline.h or libreadline.a not found in $withval)
+        AC_MSG_ERROR(readline/readline.h or libreadline.a not found in $withval)
      fi
      ;;
   esac ],
@@ -383,7 +384,7 @@ AC_SUBST(EDITLIB)
 fi
 
 if test -z "$EDITLIB" ; then
-	AC_ERROR(need either libedit or libreadline; install one of them)
+	AC_MSG_ERROR(need either libedit or libreadline; install one of them)
 fi
 
 dnl zlib is required
@@ -447,7 +448,7 @@ if test x"$PATH_PYTHON" != x -a x"$DO_PYTHON" = xdefine ; then
         PATH_PYTHON=$PATH_PYTHON24
         DO_PYTHON=define
       else
-        AC_ERROR(need at least Python 2.4)
+        AC_MSG_ERROR(need at least Python 2.4)
       fi
    else
       DO_PYTHON=define
@@ -524,7 +525,15 @@ AC_SUBST(PYTHONLIB)
 AC_SUBST(PYTHONINC)
 
 # Checks for header files.
-AC_HEADER_STDC
+m4_warn([obsolete],
+[The preprocessor macro `STDC_HEADERS' is obsolete.
+  Except in unusual embedded environments, you can safely include all
+  ISO C90 headers unconditionally.])dnl
+# Autoupdate added the next two lines to ensure that your configure
+# script's behavior did not change.  They are probably safe to remove.
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(stdarg.h errno.h fcntl.h paths.h stdlib.h string.h time.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h sys/ioccom.h sys/file.h net/bpf.h syslog.h unistd.h assert.h)
 
@@ -538,11 +547,36 @@ AC_CHECK_TYPE(u_int64_t, unsigned long long)
 AC_CHECK_TYPE(u_int32_t, unsigned int)
 AC_CHECK_TYPE(u_int16_t, unsigned short)
 AC_CHECK_TYPE(u_int8_t, unsigned char)
-AC_HEADER_TIME
+m4_warn([obsolete],
+[Update your code to rely only on HAVE_SYS_TIME_H,
+then remove this warning and the obsolete code below it.
+All current systems provide time.h; it need not be checked for.
+Not all systems provide sys/time.h, but those that do, all allow
+you to include it and time.h simultaneously.])dnl
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+# Obsolete code to be removed.
+if test $ac_cv_header_sys_time_h = yes; then
+  AC_DEFINE([TIME_WITH_SYS_TIME],[1],[Define to 1 if you can safely include both <sys/time.h>
+	     and <time.h>.  This macro is obsolete.])
+fi
+# End of obsolete code.
+
 
 # Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
-AC_TYPE_SIGNAL
+m4_warn([obsolete],
+[your code may safely assume C89 semantics that RETSIGTYPE is void.
+Remove this warning and the `AC_CACHE_CHECK' when you adjust the code.])dnl
+AC_CACHE_CHECK([return type of signal handlers],[ac_cv_type_signal],[AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([#include <sys/types.h>
+#include <signal.h>
+],
+		 [return *(signal (0, 0)) (0) == 1;])],
+		   [ac_cv_type_signal=int],
+		   [ac_cv_type_signal=void])])
+AC_DEFINE_UNQUOTED([RETSIGTYPE],[$ac_cv_type_signal],[Define as the return type of signal handlers
+		    (`int' or `void').])
+
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(asprintf dup2 fgetln gettimeofday memmove memset strcasecmp strchr strdup strncasecmp strtoul strspn getaddrinfo getnameinfo freeaddrinfo setgroups sendmsg recvmsg setregid setruid kqueue)
 AC_REPLACE_FUNCS(daemon err strsep strlcpy strlcat getopt_long)
@@ -555,8 +589,7 @@ fi
 dnl make sure we're using the real structure members and not defines
 AC_CACHE_CHECK([for msg_accrights field in struct msghdr],
 		ac_cv_have_accrights_in_msghdr, [
-	AC_TRY_RUN(
-		[
+	AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
@@ -568,10 +601,8 @@ struct msghdr m;
 m.msg_accrights = 0;
 exit(0);
 }
-		],
-		[ ac_cv_have_accrights_in_msghdr="yes" ],
-		[ ac_cv_have_accrights_in_msghdr="no" ]
-	)
+		]])],[ ac_cv_have_accrights_in_msghdr="yes" ],[ ac_cv_have_accrights_in_msghdr="no" 
+	],[])
 ])
 if test "x$ac_cv_have_accrights_in_msghdr" = "xyes" ; then
 	AC_DEFINE(HAVE_ACCRIGHTS_IN_MSGHDR,1 ,
@@ -579,21 +610,17 @@ if test "x$ac_cv_have_accrights_in_msghdr" = "xyes" ; then
 fi
 
 AC_MSG_CHECKING([for sun_len in socketaddr_un])
-AC_TRY_COMPILE([
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
  #include <sys/types.h>
  #include <sys/socket.h>
- #include <sys/un.h>],
-  [struct sockaddr_un x; x.sun_len = 0],
-  [AC_MSG_RESULT([yes])
+ #include <sys/un.h>]], [[struct sockaddr_un x; x.sun_len = 0]])],[AC_MSG_RESULT([yes])
    AC_DEFINE(HAVE_SUN_LEN, 1, [Set if you have sun_len in socketaddr_un])
-  ],
-  AC_MSG_RESULT([no])
-)
+  ],[AC_MSG_RESULT(no)
+])
 
 AC_CACHE_CHECK([for msg_control field in struct msghdr],
 		ac_cv_have_control_in_msghdr, [
-	AC_TRY_RUN(
-		[
+	AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/uio.h>
@@ -605,10 +632,8 @@ struct msghdr m;
 m.msg_control = 0;
 exit(0);
 }
-		],
-		[ ac_cv_have_control_in_msghdr="yes" ],
-		[ ac_cv_have_control_in_msghdr="no" ]
-	)
+		]])],[ ac_cv_have_control_in_msghdr="yes" ],[ ac_cv_have_control_in_msghdr="no" 
+	],[])
 ])
 if test "x$ac_cv_have_control_in_msghdr" = "xyes" ; then
 	AC_DEFINE(HAVE_CONTROL_IN_MSGHDR,1,
@@ -650,8 +675,7 @@ fi
 LIBS=$DNETLIB
 
         AC_MSG_CHECKING(for working addr_cmp in libdnet)
-        AC_TRY_RUN(
-#include <sys/types.h>
+        AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/types.h>
 #include <stdlib.h>
 #include <dnet.h>
 int
@@ -668,37 +692,33 @@ main(int argc, char **argv)
 	memset(&a2.addr_ip, 1, sizeof(a2.addr_ip));
 
         exit(addr_cmp(&a1, &a2) > 0);
-}, AC_MSG_RESULT(yes), [
-        AC_ERROR(you need to install a more recent version of libdnet)
-], AC_MSG_RESULT(yes))
+}]])],[AC_MSG_RESULT(yes)],[
+        _au_m4_changequote([,])AC_ERROR(you need to install a more recent version of libdnet)
+],[AC_MSG_RESULT(yes)])
 
         AC_MSG_CHECKING(for addr_net in libdnet)
-        AC_TRY_LINK([
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <stdlib.h>
 #include <dnet.h>
-],[
+]], [[
 	struct addr a1;
 	struct addr a2;
 
 	addr_net(&a1, &a2);
-], AC_MSG_RESULT(yes), [
-        AC_ERROR(you need to install a more recent version of libdnet)
-], AC_MSG_RESULT(yes))
+]])],[AC_MSG_RESULT(yes)],[
+        _au_m4_changequote([,])AC_ERROR(you need to install a more recent version of libdnet)
+])
 
 CFLAGS=""
 LIBS=""
 
 AC_CACHE_CHECK([for struct sockaddr_storage], ac_cv_have_struct_sockaddr_storage, [
-	AC_TRY_COMPILE(
-		[
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 #include <sys/socket.h>
-		],
-		[ struct sockaddr_storage s; ],
-		[ ac_cv_have_struct_sockaddr_storage="yes" ],
-		[ ac_cv_have_struct_sockaddr_storage="no" ]
-	)
+		]], [[ struct sockaddr_storage s; ]])],[ ac_cv_have_struct_sockaddr_storage="yes" ],[ ac_cv_have_struct_sockaddr_storage="no" 
+	])
 ])
 if test "x$ac_cv_have_struct_sockaddr_storage" = "xyes" ; then
 	AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1,
@@ -708,12 +728,9 @@ fi
 if test "$ac_cv_header_sys_socket_h" = yes ; then
 AC_MSG_CHECKING(for sa_len in sockaddr struct)
     AC_CACHE_VAL(ac_cv_sockaddr_has_sa_len,
-        AC_TRY_COMPILE([
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #       include <sys/types.h>
-#       include <sys/socket.h>],
-        [u_int i = sizeof(((struct sockaddr *)0)->sa_len)],
-        ac_cv_sockaddr_has_sa_len=yes,
-        ac_cv_sockaddr_has_sa_len=no))
+#       include <sys/socket.h>]], [[u_int i = sizeof(((struct sockaddr *)0)->sa_len)]])],[ac_cv_sockaddr_has_sa_len=yes],[ac_cv_sockaddr_has_sa_len=no]))
     AC_MSG_RESULT($ac_cv_sockaddr_has_sa_len)
     if test $ac_cv_sockaddr_has_sa_len = yes ; then
             AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1,
@@ -723,8 +740,7 @@ fi
 
 dnl check if underscores are needed
 AC_MSG_CHECKING(if underscores are needed for symbols)
-AC_TRY_RUN(
-#include <dlfcn.h>
+AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <dlfcn.h>
 #include <stdio.h>
 
 int underscoreprobe(void) { return (31415); }
@@ -741,15 +757,13 @@ main(int argc, char **argv)
 		exit(0);
 
 	exit(1);	
-}, [AC_MSG_RESULT(yes)
-   AC_DEFINE(DL_NEED_UNDERSCORE, 1, [Do symbols need underscores?])],
-    AC_MSG_RESULT(no), AC_MSG_RESULT(no))
+}]])],[AC_MSG_RESULT(yes)
+   AC_DEFINE(DL_NEED_UNDERSCORE, 1, [Do symbols need underscores?])],[AC_MSG_RESULT(no)],[AC_MSG_RESULT(no)])
 
 HAVEMETHOD=no
 
 AC_MSG_CHECKING(if we can access libc without dlopen)
-AC_TRY_RUN(
-#include <dlfcn.h>
+AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <dlfcn.h>
 #include <stdio.h>
 
 int
@@ -763,9 +777,9 @@ main(int argc, char **argv)
 		exit(0);
 
 	exit(1);
-}, [AC_MSG_RESULT(yes)
+}]])],[AC_MSG_RESULT(yes)
     AC_DEFINE(NODLOPEN, 1, [Do we need to call dlopen()?])
-    HAVEMETHOD=yes], AC_MSG_RESULT(no), AC_MSG_RESULT(no))
+    HAVEMETHOD=yes],[AC_MSG_RESULT(no)],[AC_MSG_RESULT(no)])
 
 if test "$HAVEMETHOD" = "no"; then
 
@@ -775,8 +789,7 @@ if test "$HAVEMETHOD" = "no"; then
     for TESTLIB in libc.so libc.so.6
     do
         AC_MSG_CHECKING(if we can access libc with $TESTLIB)
-        AC_TRY_RUN(
-        #include <dlfcn.h>
+        AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <dlfcn.h>
         #include <stdio.h>
     
         int
@@ -788,10 +801,10 @@ if test "$HAVEMETHOD" = "no"; then
     	           exit(0);
     
             exit(1);
-        }, [AC_MSG_RESULT(yes)
+        }]])],[AC_MSG_RESULT(yes)
             AC_DEFINE_UNQUOTED(DLOPENLIBC, "$TESTLIB", 
 	    [Defines which libc to preload])
-	    HAVEMETHOD=yes], AC_MSG_RESULT(no), AC_MSG_RESULT(no))
+	    HAVEMETHOD=yes],[AC_MSG_RESULT(no)],[AC_MSG_RESULT(no)])
 
 	if test "$HAVEMETHOD" = "yes"; then
 	   break
