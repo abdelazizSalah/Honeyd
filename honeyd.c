@@ -110,6 +110,10 @@
 #include "pydatahoneyd.h"
 #endif
 
+
+// struct event_base *libevent_base = NULL;
+
+
 /* Prototypes */
 void honeyd_tcp_timeout(int, short, void *);
 void honeyd_udp_timeout(int, short, void *);

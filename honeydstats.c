@@ -79,6 +79,10 @@
 
 /* Stubs to make it compile */
 
+struct event_base *stats_libevent_base = NULL;
+
+
+
 int pcap_datalink(void *some) {	return (-1); }
 char *honeyd_osfp_name(struct ip_hdr *hdr) { return (NULL); }
 void hooks_add_packet_hook(int protocol, int dir, void *callback, void *arg) {}
