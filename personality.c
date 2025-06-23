@@ -65,6 +65,12 @@
 #include "template.h"
 #include "debug.h"
 
+
+// Define the global instances
+struct perstree personalities;
+struct xp_fprint_tree xp_fprints;
+
+
 /* ET - Moved SPLAY_HEAD to personality.h so xprobe_assoc.c could use it. */
 int npersons;
 

@@ -292,19 +292,29 @@ void xprobe_personality_init(void);
 void print_perstree(void);
 
 /* Splay stuff here so other modules can use it */
-SPLAY_HEAD(perstree, personality) personalities;
+// extern SPLAY_HEAD(perstree, personality) personalities;
+// ✅ This defines the struct type, but not the variable:
+SPLAY_HEAD(perstree, personality);
+SPLAY_HEAD(xp_fprint_tree, xp_fingerprint);
+
+
+// ✅ This declares the variable (but doesn’t define it)
+extern struct perstree personalities;
+extern struct xp_fprint_tree xp_fprints; 
+
+
 static int
 perscompare(struct personality *a, struct personality *b)
 {
-  return (strcmp(a->name, b->name));
+	return (strcmp(a->name, b->name));
 }
 SPLAY_PROTOTYPE(perstree, personality, node, perscompare);
 
-SPLAY_HEAD(xp_fprint_tree, xp_fingerprint) xp_fprints;
+
 static int 
 xp_fprint_compare(struct xp_fingerprint *a, struct xp_fingerprint *b)
 {
-  return (strcmp(a->os_id, b->os_id));
+	return (strcmp(a->os_id, b->os_id));
 }
 SPLAY_PROTOTYPE(xp_fprint_tree, xp_fingerprint, node, xp_fprint_compare);
 

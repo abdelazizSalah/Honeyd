@@ -69,6 +69,9 @@
 #include "osfp.h"
 #include "stats.h"
 
+
+
+struct event_base *libevent_base = NULL;
 int make_socket(int (*f)(int, const struct sockaddr *, socklen_t), int type,
     char *, uint16_t);
 static void stats_make_fd(struct addr *, u_short);
